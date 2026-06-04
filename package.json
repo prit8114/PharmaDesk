@@ -1,0 +1,42 @@
+{
+  "name": "pharmacy-pms",
+  "version": "1.0.0",
+  "description": "Pharmacy Practice Management System (PMS)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [
+    "pharmacy",
+    "pms",
+    "electron"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^42.3.3"
+  },
+  "dependencies": {
+    "buffer-crc32": "^0.2.13",
+    "debug": "^4.4.3",
+    "end-of-stream": "^1.4.5",
+    "env-paths": "^3.0.0",
+    "extract-zip": "^2.0.1",
+    "fd-slicer": "^1.1.0",
+    "get-stream": "^5.2.0",
+    "graceful-fs": "^4.2.11",
+    "ms": "^2.1.3",
+    "once": "^1.4.0",
+    "pend": "^1.2.0",
+    "progress": "^2.0.3",
+    "pump": "^3.0.4",
+    "semver": "^7.8.1",
+    "sumchecker": "^3.0.1",
+    "undici": "^7.27.1",
+    "undici-types": "^7.18.2",
+    "wrappy": "^1.0.2",
+    "yauzl": "^2.10.0"
+  },
+  "type": "commonjs"
+}
