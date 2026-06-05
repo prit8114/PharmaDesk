@@ -5,12 +5,13 @@ const SCHEMA_QUERIES = [
     id              INTEGER PRIMARY KEY,
     username        TEXT UNIQUE NOT NULL,
     pin_hash        TEXT NOT NULL,
-    role            TEXT NOT NULL CHECK(role IN ('admin', 'staff')),
+    role            TEXT,
     full_name       TEXT NOT NULL,
     phone           TEXT,
     failed_attempts INTEGER NOT NULL DEFAULT 0,
     locked_until    TEXT,
     last_login      TEXT,
+    is_first_login  INTEGER NOT NULL DEFAULT 1,
     status          TEXT NOT NULL DEFAULT 'active'
                     CHECK(status IN ('active', 'inactive')),
     created_at      TEXT DEFAULT (datetime('now')),
@@ -397,7 +398,12 @@ const SCHEMA_QUERIES = [
 
 ];
 
+// Increment this whenever the schema changes in a way that requires migration.
+// This value is stored in SQLite's user_version pragma to detect stale databases.
+const SCHEMA_VERSION = 2;
+
 module.exports = {
   SCHEMA_QUERIES,
+  SCHEMA_VERSION,
   schema: SCHEMA_QUERIES.join('\n\n')
 };
