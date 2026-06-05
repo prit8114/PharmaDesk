@@ -51,3 +51,6 @@ backups/*.sql
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Electron build output
+dist/release/
