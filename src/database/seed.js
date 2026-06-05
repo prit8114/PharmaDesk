@@ -6,14 +6,10 @@
  * Never overwrites existing data.
  */
 
-const crypto = require('crypto');
 const { db } = require('./database');
+const { hashPIN } = require('../utils/pin');
 
 // ── Helper ────────────────────────────────────────────────────
-function hashPIN(pin) {
-    return crypto.createHash('sha256').update(pin.toString()).digest('hex');
-}
-
 function getDefaultAdminPIN() {
     const configuredPIN = String(process.env.DEFAULT_ADMIN_PIN || '').trim();
 
