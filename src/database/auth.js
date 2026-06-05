@@ -1,5 +1,5 @@
 const { db } = require('./database');
-const { hashPIN, normalizePIN } = require('../utils/pin');
+const { hashPIN, normalizePIN, verifyPIN } = require('../utils/pin');
 
 function sanitizeUser(user) {
     if (!user) {
@@ -51,7 +51,7 @@ function createUserAccount({ username, pin, fullName, phone = null, status = 'ac
       VALUES (${placeholders})
     `).run(...insertValues);
 
-    return getUserByUsername(normalizedUsername);
+    return sanitizeUser(getUserByUsername(normalizedUsername));
 }
 
 function authenticateUser(username, pin) {
@@ -73,7 +73,7 @@ function authenticateUser(username, pin) {
         return { success: false, reason: 'invalid_pin_format' };
     }
 
-    if (user.pin_hash !== hashPIN(normalizedPIN)) {
+        if (!verifyPIN(normalizedPIN, user.pin_hash)) {
         db.prepare(`
           UPDATE users
           SET failed_attempts = failed_attempts + 1,
@@ -124,11 +124,11 @@ function changeUserPIN({ userId, currentPIN, newPIN }) {
     const normalizedCurrentPIN = normalizePIN(currentPIN);
     const normalizedNewPIN = normalizePIN(newPIN);
 
-    if (user.pin_hash !== hashPIN(normalizedCurrentPIN)) {
+    if (!verifyPIN(normalizedCurrentPIN, user.pin_hash)) {
         throw new Error('Current PIN is incorrect');
     }
 
-    if (hashPIN(normalizedCurrentPIN) === hashPIN(normalizedNewPIN)) {
+    if (normalizedCurrentPIN === normalizedNewPIN) {
         throw new Error('New PIN must be different from the current PIN');
     }
 
