@@ -1,4 +1,5 @@
 const authRepo = require('./auth.repository');
+const { validateLogin, validateChangePIN, validateCompletePINChange } = require('./auth.validator');
 
 let currentSession = null;
 
@@ -37,6 +38,7 @@ function requireRole(role) {
 }
 
 function login(username, pin) {
+  validateLogin(username, pin);
   const result = authRepo.authenticate(username, pin);
   
   if (result.success && !result.requiresPINChange) {
@@ -51,6 +53,7 @@ function logout() {
 }
 
 function changePIN(currentPIN, newPIN) {
+  validateChangePIN(currentPIN, newPIN);
   const session = requireAuth();
   const updatedUser = authRepo.changePIN({ 
     userId: session.userId, 
@@ -62,6 +65,7 @@ function changePIN(currentPIN, newPIN) {
 }
 
 function completePINChange(userId, currentPIN, newPIN) {
+  validateCompletePINChange(userId, currentPIN, newPIN);
   const updatedUser = authRepo.changePIN({ userId, currentPIN, newPIN });
   createSession(updatedUser);
   return { success: true, user: updatedUser };
