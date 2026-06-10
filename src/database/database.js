@@ -13,9 +13,8 @@
 require('dotenv').config();
 
 const Database = require('better-sqlite3');
-const path     = require('node:path');
-const fs       = require('node:fs');
-const { SCHEMA_QUERIES } = require('./schema');
+const path = require('node:path');
+const fs = require('node:fs');
 
 // ── Path Setup ────────────────────────────────────────────────
 // In production: AppData/Roaming/PharmacyPMS/data/main.db
@@ -93,9 +92,9 @@ function runIntegrityCheck() {
 // ── Export FIRST ──────────────────────────────────────────────
 // Must happen BEFORE requiring seed.js to avoid circular dependency
 // (seed.js requires database.js, so db must already be exported)
-module.exports.db      = db;
+module.exports.db = db;
 module.exports.DB_PATH = DB_PATH;
-module.exports.DB_DIR  = DB_DIR;
+module.exports.DB_DIR = DB_DIR;
 module.exports.isHealthy = false;
 
 // ── Startup Sequence ──────────────────────────────────────────
