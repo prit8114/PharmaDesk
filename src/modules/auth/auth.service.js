@@ -37,7 +37,7 @@ function requireRole(role) {
 }
 
 function login(username, pin) {
-  const result = authRepo.authenticateUser(username, pin);
+  const result = authRepo.authenticate(username, pin);
   
   if (result.success && !result.requiresPINChange) {
     createSession(result.user);
@@ -52,7 +52,7 @@ function logout() {
 
 function changePIN(currentPIN, newPIN) {
   const session = requireAuth();
-  const updatedUser = authRepo.changeUserPIN({ 
+  const updatedUser = authRepo.changePIN({ 
     userId: session.userId, 
     currentPIN, 
     newPIN 
@@ -62,7 +62,7 @@ function changePIN(currentPIN, newPIN) {
 }
 
 function completePINChange(userId, currentPIN, newPIN) {
-  const updatedUser = authRepo.changeUserPIN({ userId, currentPIN, newPIN });
+  const updatedUser = authRepo.changePIN({ userId, currentPIN, newPIN });
   createSession(updatedUser);
   return { success: true, user: updatedUser };
 }
