@@ -1,5 +1,5 @@
-const { db } = require('./database');
-const { hashPIN, normalizePIN, verifyPIN } = require('../utils/pin');
+const { db } = require('../../database/database');
+const { hashPIN, normalizePIN, verifyPIN } = require('../../utils/pin');
 
 function sanitizeUser(user) {
     if (!user) {
