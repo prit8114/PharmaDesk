@@ -53,8 +53,8 @@ function logout() {
 }
 
 function changePIN(currentPIN, newPIN) {
-  validateChangePIN(currentPIN, newPIN);
   const session = requireAuth();
+  validateChangePIN(currentPIN, newPIN);
   const updatedUser = authRepo.changePIN({ 
     userId: session.userId, 
     currentPIN, 
