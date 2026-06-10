@@ -15,7 +15,7 @@ require('dotenv').config();
 const Database = require('better-sqlite3');
 const path     = require('node:path');
 const fs       = require('node:fs');
-const { SCHEMA_QUERIES, SCHEMA_VERSION } = require('./schema');
+const { SCHEMA_QUERIES } = require('./schema');
 
 // ── Path Setup ────────────────────────────────────────────────
 // In production: AppData/Roaming/PharmacyPMS/data/main.db
@@ -60,94 +60,12 @@ try {
   process.exit(1);
 }
 
-// ── Schema Migration Check (Issue #5) ─────────────────────────
-// SQLite's user_version pragma stores an integer we control.
-// 0 = fresh / unknown, anything else = a schema version we set.
-function getTableColumns(tableName) {
-  return db.prepare(`PRAGMA table_info(${tableName})`).all().map((column) => column.name);
-}
-
-function tableExists(tableName) {
-  return db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?`).get(tableName) !== undefined;
-}
-
-function ensureColumn(tableName, columnName, columnDefinition) {
-  const columns = getTableColumns(tableName);
-
-  if (!columns.includes(columnName)) {
-    db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition}`).run();
-    return true;
-  }
-
-  return false;
-}
-
-function migrateUsersTable() {
-  if (!tableExists('users')) {
-    return;
-  }
-
-  const migration = db.transaction(() => {
-    ensureColumn('users', 'pin_hash', "pin_hash TEXT NOT NULL DEFAULT ''");
-    ensureColumn('users', 'role', 'role TEXT');
-    ensureColumn('users', 'full_name', "full_name TEXT NOT NULL DEFAULT ''");
-    ensureColumn('users', 'phone', 'phone TEXT');
-    ensureColumn('users', 'failed_attempts', 'failed_attempts INTEGER NOT NULL DEFAULT 0');
-    ensureColumn('users', 'locked_until', 'locked_until TEXT');
-    ensureColumn('users', 'last_login', 'last_login TEXT');
-    ensureColumn('users', 'is_first_login', 'is_first_login INTEGER NOT NULL DEFAULT 1');
-    ensureColumn('users', 'status', "status TEXT NOT NULL DEFAULT 'active'");
-    ensureColumn('users', 'created_at', "created_at TEXT DEFAULT (datetime('now'))");
-    ensureColumn('users', 'updated_at', 'updated_at TEXT');
-
-    db.prepare(`
-      UPDATE users
-      SET
-        full_name = COALESCE(NULLIF(full_name, ''), 'Administrator'),
-        status = 'active',
-        is_first_login = COALESCE(is_first_login, 1)
-      WHERE username = 'admin'
-    `).run();
-  });
-
-  migration();
-}
+// ── Schema Migrations ─────────────────────────────────────────
+const { runMigrations } = require('./migrations/migration.runner');
 
 function runSchema() {
   try {
-    const currentVersion = db.pragma('user_version', { simple: true });
-
-    if (currentVersion === 0) {
-      // Fresh database — create all tables and stamp the version
-      console.log('🆕 Fresh database detected — creating schema...');
-      const runAllTables = db.transaction(() => {
-        for (const query of SCHEMA_QUERIES) {
-          db.prepare(query).run();
-        }
-      });
-      runAllTables();
-      migrateUsersTable();
-      // Stamp the schema version after a successful creation and migration
-      db.pragma(`user_version = ${SCHEMA_VERSION}`);
-      console.log(`✅ Schema v${SCHEMA_VERSION} applied successfully`);
-
-    } else if (currentVersion < SCHEMA_VERSION) {
-      // Existing DB with an older schema — migrations needed
-      console.warn(`⚠️  Schema mismatch: DB is v${currentVersion}, app expects v${SCHEMA_VERSION}`);
-      migrateUsersTable();
-      db.pragma(`user_version = ${SCHEMA_VERSION}`);
-      console.log(`✅ Schema migrated to v${SCHEMA_VERSION}`);
-
-    } else if (currentVersion === SCHEMA_VERSION) {
-      migrateUsersTable();
-      console.log(`✅ Schema v${SCHEMA_VERSION} — up to date`);
-
-    } else {
-      // DB version is newer than the app — downgrade scenario
-      console.warn(`⚠️  DB schema v${currentVersion} is newer than app schema v${SCHEMA_VERSION}`);
-      console.warn('   Update the app to avoid compatibility issues.');
-    }
-
+    runMigrations(db);
   } catch (err) {
     console.error('FATAL: Schema creation/migration failed');
     console.error(err.message);
