@@ -1,5 +1,5 @@
 const { ipcMain } = require('electron');
-const authService = require('./auth.service');
+const authService = require('../modules/auth/auth.service');
 
 function registerAuthIPC() {
   ipcMain.handle('auth:login', async (event, username, pin) => {

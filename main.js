@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
 
 // ── IPC Registration ──────────────────────────────────────────
-const { registerAuthIPC } = require('./src/modules/auth/auth.ipc');
+const { registerAuthIPC } = require('./src/ipc/auth.ipc');
 
 // Each line is uncommented when that phase is built
 function registerAllIPC() {
