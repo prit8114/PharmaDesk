@@ -394,13 +394,26 @@ const SCHEMA_QUERIES = [
     user_id     INTEGER,
     created_at  TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-  );`
+  );`,
+
+  // 22. Indexes
+  `CREATE INDEX IF NOT EXISTS idx_medicines_name    ON medicines(name);`,
+  `CREATE INDEX IF NOT EXISTS idx_medicines_barcode ON medicines(barcode);`,
+  `CREATE INDEX IF NOT EXISTS idx_batches_medicine  ON batches(medicine_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_batches_expiry    ON batches(expiry_date);`,
+  `CREATE INDEX IF NOT EXISTS idx_batches_status    ON batches(status);`,
+  `CREATE INDEX IF NOT EXISTS idx_bills_date        ON bills(bill_date);`,
+  `CREATE INDEX IF NOT EXISTS idx_bill_items_bill   ON bill_items(bill_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_purchases_date    ON purchases(purchase_date);`,
+  `CREATE INDEX IF NOT EXISTS idx_audit_logs_user   ON audit_logs(user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_inventory_log_med ON inventory_log(medicine_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_status ON notification_log(status);`
 
 ];
 
 // Increment this whenever the schema changes in a way that requires migration.
 // This value is stored in SQLite's user_version pragma to detect stale databases.
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 module.exports = {
   SCHEMA_QUERIES,

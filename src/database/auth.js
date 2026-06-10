@@ -61,6 +61,10 @@ function authenticateUser(username, pin) {
         return { success: false, reason: 'invalid_credentials' };
     }
 
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+        return { success: false, reason: 'account_locked', lockedUntil: user.locked_until };
+    }
+
     if (user.status !== 'active') {
         return { success: false, reason: 'inactive_account' };
     }
@@ -80,6 +84,13 @@ function authenticateUser(username, pin) {
               updated_at = datetime('now')
           WHERE id = ?
         `).run(user.id);
+
+        const updated = db.prepare(`SELECT failed_attempts FROM users WHERE id = ?`).get(user.id);
+        if (updated.failed_attempts >= 5) {
+            const lockUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // 30 min lockout
+            db.prepare(`UPDATE users SET locked_until = ?, updated_at = datetime('now') WHERE id = ?`)
+                .run(lockUntil, user.id);
+        }
 
         return { success: false, reason: 'invalid_credentials' };
     }
